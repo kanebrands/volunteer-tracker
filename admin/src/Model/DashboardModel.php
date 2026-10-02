@@ -23,6 +23,34 @@ class DashboardModel extends BaseDatabaseModel
 		return $db->loadObjectList() ?: [];
 	}
 
+	public function getEvents(): array
+	{
+		$db = $this->getDatabase();
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('events.id'),
+				$db->quoteName('events.event_name'),
+				$db->quoteName('events.event_date'),
+				$db->quoteName('events.event_location'),
+				'COUNT(' . $db->quoteName('entries.id') . ') AS volunteer_entries',
+				'COALESCE(SUM(' . $db->quoteName('entries.hours') . '), 0) AS total_hours',
+			])
+			->from($db->quoteName('#__volunteertracker_events', 'events'))
+			->join('LEFT', $db->quoteName('#__volunteertracker_entries', 'entries') . ' ON ' . $db->quoteName('entries.event_id') . ' = ' . $db->quoteName('events.id'))
+			->group([
+				$db->quoteName('events.id'),
+				$db->quoteName('events.event_name'),
+				$db->quoteName('events.event_date'),
+				$db->quoteName('events.event_location'),
+			])
+			->order($db->quoteName('events.event_date') . ' DESC, ' . $db->quoteName('events.event_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
 	public function getStats(): object
 	{
 		$db = $this->getDatabase();
@@ -39,7 +67,6 @@ class DashboardModel extends BaseDatabaseModel
 			->select([
 				'COUNT(*) AS entries',
 				'COUNT(DISTINCT ' . $db->quoteName('volunteer_name') . ') AS volunteers',
-				'COUNT(DISTINCT ' . $db->quoteName('event_name') . ') AS events',
 				'SUM(' . $db->quoteName('hours') . ') AS hours',
 				'AVG(' . $db->quoteName('hours') . ') AS average_hours',
 			])
@@ -51,25 +78,31 @@ class DashboardModel extends BaseDatabaseModel
 		if ($row) {
 			$stats->entries       = (int) $row->entries;
 			$stats->volunteers    = (int) $row->volunteers;
-			$stats->events        = (int) $row->events;
 			$stats->hours         = (float) $row->hours;
 			$stats->average_hours = (float) $row->average_hours;
 		}
+
+		$query = $db->getQuery(true)
+			->select('COUNT(*)')
+			->from($db->quoteName('#__volunteertracker_events'));
+
+		$db->setQuery($query);
+		$stats->events = (int) $db->loadResult();
 
 		return $stats;
 	}
 
 	public function getEventChart(): array
 	{
-		return $this->getGroupedHours('event_name', 8);
+		return $this->getGroupedHours('event_name');
 	}
 
 	public function getVolunteerChart(): array
 	{
-		return $this->getGroupedHours('volunteer_name', 8);
+		return $this->getGroupedHours('volunteer_name');
 	}
 
-	private function getGroupedHours(string $column, int $limit): array
+	private function getGroupedHours(string $column): array
 	{
 		$db = Factory::getContainer()->get('DatabaseDriver');
 
@@ -82,7 +115,7 @@ class DashboardModel extends BaseDatabaseModel
 			->group($db->quoteName($column))
 			->order('value DESC');
 
-		$db->setQuery($query, 0, $limit);
+		$db->setQuery($query);
 
 		return $db->loadAssocList() ?: [];
 	}

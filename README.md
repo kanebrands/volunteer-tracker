@@ -17,11 +17,12 @@ Volunteer Tracker is an administrator-only Joomla component for recording volunt
 
    ```sh
    mkdir -p dist
-   zip -r dist/com_volunteertracker-1.0.0.zip admin media updates com_volunteertracker.xml
+   rm -f dist/com_volunteertracker-1.0.14.zip
+   zip -r dist/com_volunteertracker-1.0.14.zip admin media updates com_volunteertracker.xml -x "*.DS_Store"
    ```
 
 3. In the Joomla administrator area, go to **System > Install > Extensions**.
-4. Upload and install `dist/com_volunteertracker-1.0.0.zip`.
+4. Upload and install `dist/com_volunteertracker-1.0.14.zip`.
 5. Open **Components > Volunteer Tracker**.
 6. Configure Joomla permissions for the component if non-super-user administrators need access.
 
@@ -30,7 +31,9 @@ The component installer creates the `#__volunteertracker_entries` database table
 ## Capabilities and Features
 
 - Administrator-only dashboard for volunteer tracking.
-- Add and edit volunteer records with volunteer name, event name, event date, hours, and notes.
+- Add and edit volunteer records with volunteer name, event name, event date, hours, and role.
+- Autocomplete volunteer, event, and role inputs from prior saved records.
+- Generate event reports listing volunteers and assigned roles, with CSV export.
 - Delete selected records with Joomla permission checks.
 - Summary metrics for total volunteers, total events, cumulative hours, and average hours per entry.
 - Bar chart of hours by event.

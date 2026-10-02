@@ -4,18 +4,24 @@ namespace VolunteerTracker\Component\VolunteerTracker\Administrator\View\Volunte
 
 defined('_JEXEC') or die;
 
-use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use Joomla\CMS\Uri\Uri;
 
 class HtmlView extends BaseHtmlView
 {
 	protected object $item;
+	protected array $volunteerOptions = [];
+	protected array $eventOptions = [];
+	protected array $roleOptions = [];
 
 	public function display($tpl = null): void
 	{
-		$this->item = $this->get('Item');
+		$this->item             = $this->get('Item');
+		$this->volunteerOptions = $this->get('VolunteerOptions');
+		$this->eventOptions     = $this->get('EventOptions');
+		$this->roleOptions      = $this->get('RoleOptions');
 		$this->addToolbar();
 		$this->loadAssets();
 
@@ -34,7 +40,8 @@ class HtmlView extends BaseHtmlView
 
 	private function loadAssets(): void
 	{
-		$wa = Factory::getApplication()->getDocument()->getWebAssetManager();
-		$wa->useStyle('com_volunteertracker.admin');
+		$base = Uri::root(true) . '/media/com_volunteertracker';
+
+		$this->getDocument()->addCustomTag('<link rel="stylesheet" href="' . $base . '/css/admin.css?v=1.0.14">');
 	}
 }

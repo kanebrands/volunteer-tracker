@@ -13,25 +13,39 @@ use Joomla\CMS\Router\Route;
 			<div class="vt-form-grid">
 				<label>
 					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_VOLUNTEER_NAME'); ?></span>
-					<input class="form-control" type="text" name="jform[volunteer_name]" value="<?php echo htmlspecialchars($this->item->volunteer_name, ENT_QUOTES, 'UTF-8'); ?>" required>
+					<input class="form-control" type="text" name="jform[volunteer_name]" value="<?php echo htmlspecialchars($this->item->volunteer_name, ENT_QUOTES, 'UTF-8'); ?>" list="vt-volunteer-options" autocomplete="off" required>
 				</label>
 				<label>
 					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_NAME'); ?></span>
-					<input class="form-control" type="text" name="jform[event_name]" value="<?php echo htmlspecialchars($this->item->event_name, ENT_QUOTES, 'UTF-8'); ?>" required>
-				</label>
-				<label>
-					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_DATE'); ?></span>
-					<input class="form-control" type="date" name="jform[event_date]" value="<?php echo htmlspecialchars((string) $this->item->event_date, ENT_QUOTES, 'UTF-8'); ?>">
+					<select class="form-select" name="jform[event_id]" required>
+						<option value=""><?php echo Text::_('COM_VOLUNTEERTRACKER_SELECT_EVENT'); ?></option>
+						<?php foreach ($this->eventOptions as $event) : ?>
+							<?php $eventLabel = $event->event_name . ' - ' . HTMLHelper::_('date', $event->event_date, Text::_('DATE_FORMAT_LC4')); ?>
+							<option value="<?php echo (int) $event->id; ?>" <?php echo (int) $event->id === (int) $this->item->event_id ? 'selected' : ''; ?>>
+								<?php echo htmlspecialchars($eventLabel, ENT_QUOTES, 'UTF-8'); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
 				</label>
 				<label>
 					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_HOURS'); ?></span>
-					<input class="form-control" type="number" name="jform[hours]" value="<?php echo htmlspecialchars((string) $this->item->hours, ENT_QUOTES, 'UTF-8'); ?>" min="0.01" step="0.25" required>
+					<input class="form-control" type="number" name="jform[hours]" value="<?php echo htmlspecialchars((string) $this->item->hours, ENT_QUOTES, 'UTF-8'); ?>" min="0" step="0.25" placeholder="0.0">
 				</label>
-				<label class="vt-full">
-					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_NOTES'); ?></span>
-					<textarea class="form-control" name="jform[notes]" rows="5"><?php echo htmlspecialchars($this->item->notes, ENT_QUOTES, 'UTF-8'); ?></textarea>
+				<label>
+					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_ROLE'); ?></span>
+					<input class="form-control" type="text" name="jform[role]" value="<?php echo htmlspecialchars((string) $this->item->role, ENT_QUOTES, 'UTF-8'); ?>" list="vt-role-options" autocomplete="off" required>
 				</label>
 			</div>
+			<datalist id="vt-volunteer-options">
+				<?php foreach ($this->volunteerOptions as $option) : ?>
+					<option value="<?php echo htmlspecialchars($option, ENT_QUOTES, 'UTF-8'); ?>"></option>
+				<?php endforeach; ?>
+			</datalist>
+			<datalist id="vt-role-options">
+				<?php foreach ($this->roleOptions as $option) : ?>
+					<option value="<?php echo htmlspecialchars($option, ENT_QUOTES, 'UTF-8'); ?>"></option>
+				<?php endforeach; ?>
+			</datalist>
 		</section>
 	</div>
 

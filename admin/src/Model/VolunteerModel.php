@@ -16,10 +16,12 @@ class VolunteerModel extends BaseDatabaseModel
 
 		$item = (object) [
 			'id' => 0,
+			'event_id' => 0,
 			'volunteer_name' => '',
 			'event_name' => '',
 			'event_date' => '',
 			'hours' => '',
+			'role' => '',
 			'notes' => '',
 		];
 
@@ -47,22 +49,21 @@ class VolunteerModel extends BaseDatabaseModel
 
 		$row = (object) [
 			'id' => (int) ($data['id'] ?? 0),
+			'event_id' => (int) ($data['event_id'] ?? 0),
 			'volunteer_name' => trim((string) ($data['volunteer_name'] ?? '')),
-			'event_name' => trim((string) ($data['event_name'] ?? '')),
-			'event_date' => trim((string) ($data['event_date'] ?? '')),
 			'hours' => max(0, (float) ($data['hours'] ?? 0)),
-			'notes' => trim((string) ($data['notes'] ?? '')),
+			'role' => trim((string) ($data['role'] ?? '')),
 			'modified' => $now,
 			'modified_by' => (int) $app->getIdentity()->id,
 		];
+		$event = $this->getEventById($row->event_id);
 
-		if ($row->volunteer_name === '' || $row->event_name === '' || $row->hours <= 0) {
+		if ($row->volunteer_name === '' || !$event || $row->role === '') {
 			return 0;
 		}
 
-		if ($row->event_date === '') {
-			$row->event_date = null;
-		}
+		$row->event_name = $event->event_name;
+		$row->event_date = $event->event_date;
 
 		if ($row->id) {
 			$db->updateObject('#__volunteertracker_entries', $row, 'id');
@@ -77,6 +78,35 @@ class VolunteerModel extends BaseDatabaseModel
 		return (int) $db->insertid();
 	}
 
+	public function getVolunteerOptions(): array
+	{
+		return $this->getDistinctOptions('volunteer_name');
+	}
+
+	public function getEventOptions(): array
+	{
+		$db = $this->getDatabase();
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('id'),
+				$db->quoteName('event_name'),
+				$db->quoteName('event_date'),
+				$db->quoteName('event_location'),
+			])
+			->from($db->quoteName('#__volunteertracker_events'))
+			->order($db->quoteName('event_date') . ' DESC, ' . $db->quoteName('event_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
+	public function getRoleOptions(): array
+	{
+		return $this->getDistinctOptions('role');
+	}
+
 	public function delete(array $ids): void
 	{
 		$db = $this->getDatabase();
@@ -86,5 +116,43 @@ class VolunteerModel extends BaseDatabaseModel
 			->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $ids)) . ')');
 
 		$db->setQuery($query)->execute();
+	}
+
+	private function getDistinctOptions(string $column): array
+	{
+		$db = $this->getDatabase();
+
+		$query = $db->getQuery(true)
+			->select('DISTINCT ' . $db->quoteName($column))
+			->from($db->quoteName('#__volunteertracker_entries'))
+			->where($db->quoteName($column) . ' <> ' . $db->quote(''))
+			->order($db->quoteName($column) . ' ASC');
+
+		$db->setQuery($query);
+
+		return array_values(array_filter(array_map('strval', $db->loadColumn() ?: [])));
+	}
+
+	private function getEventById(int $id): ?object
+	{
+		if (!$id) {
+			return null;
+		}
+
+		$db = $this->getDatabase();
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('id'),
+				$db->quoteName('event_name'),
+				$db->quoteName('event_date'),
+			])
+			->from($db->quoteName('#__volunteertracker_events'))
+			->where($db->quoteName('id') . ' = ' . (int) $id);
+
+		$db->setQuery($query);
+		$event = $db->loadObject();
+
+		return $event ?: null;
 	}
 }
