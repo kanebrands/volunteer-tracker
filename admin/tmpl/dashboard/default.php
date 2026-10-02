@@ -123,11 +123,10 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 				</header>
 				<div class="vt-role-card-body">
 					<label>
-						<span><?php echo Text::_('COM_VOLUNTEERTRACKER_ROLE'); ?></span>
-						<select class="form-select" id="vt-role-coverage-role"></select>
+						<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_NAME'); ?></span>
+						<select class="form-select" id="vt-role-coverage-event"></select>
 					</label>
-					<strong id="vt-role-coverage-count">0</strong>
-					<p id="vt-role-coverage-caption"><?php echo Text::_('COM_VOLUNTEERTRACKER_ROLE_CARD_EMPTY'); ?></p>
+					<div class="vt-horizontal-chart" id="vt-role-coverage-chart" aria-live="polite"></div>
 				</div>
 			</section>
 			<section class="vt-panel vt-role-card">
@@ -137,17 +136,12 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 						<p><?php echo Text::_('COM_VOLUNTEERTRACKER_VOLUNTEER_ROLE_COUNT_HELP'); ?></p>
 					</div>
 				</header>
-				<div class="vt-role-card-body vt-role-card-body-split">
+				<div class="vt-role-card-body">
 					<label>
 						<span><?php echo Text::_('COM_VOLUNTEERTRACKER_VOLUNTEER_NAME'); ?></span>
 						<select class="form-select" id="vt-volunteer-role-volunteer"></select>
 					</label>
-					<label>
-						<span><?php echo Text::_('COM_VOLUNTEERTRACKER_ROLE'); ?></span>
-						<select class="form-select" id="vt-volunteer-role-role"></select>
-					</label>
-					<strong id="vt-volunteer-role-count">0</strong>
-					<p id="vt-volunteer-role-caption"><?php echo Text::_('COM_VOLUNTEERTRACKER_ROLE_CARD_EMPTY'); ?></p>
+					<div class="vt-horizontal-chart" id="vt-volunteer-role-chart" aria-live="polite"></div>
 				</div>
 			</section>
 		</div>

@@ -16,10 +16,11 @@
 		.map((row) => ({
 			volunteer: row[0],
 			event: row[1],
+			eventDate: row[2],
 			hours: numberValue(row[3]),
 			role: row[4],
 		}))
-		.filter((row) => row.volunteer && row.event && row.hours > 0);
+		.filter((row) => row.volunteer && row.event && row.role);
 
 	const uniqueValues = (rows, key) => [...new Set(rows.map((row) => row[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
@@ -38,8 +39,80 @@
 		});
 	};
 
+	const eventLabel = (row) => [row.event, row.eventDate].filter(Boolean).join(' - ');
+
+	const countRows = (rows, key, valueFactory = () => 1) => {
+		const groups = rows.reduce((result, row) => {
+			const label = row[key];
+
+			if (!label) {
+				return result;
+			}
+
+			if (!result[label]) {
+				result[label] = valueFactory(row);
+				return result;
+			}
+
+			const value = valueFactory(row);
+
+			if (result[label] instanceof Set && value instanceof Set) {
+				value.forEach((item) => result[label].add(item));
+				return result;
+			}
+
+			result[label] += value;
+			return result;
+		}, {});
+
+		return Object.entries(groups)
+			.map(([label, value]) => ({ label, value: value instanceof Set ? value.size : value }))
+			.sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
+	};
+
+	const drawHorizontalBars = (target, rows, emptyText) => {
+		if (!target) {
+			return;
+		}
+
+		target.innerHTML = '';
+
+		if (!rows.length) {
+			const empty = document.createElement('p');
+			empty.className = 'vt-horizontal-empty';
+			empty.textContent = emptyText;
+			target.append(empty);
+			return;
+		}
+
+		const max = Math.max(...rows.map((row) => Number(row.value)), 1);
+
+		rows.forEach((row, index) => {
+			const item = document.createElement('div');
+			const label = document.createElement('span');
+			const track = document.createElement('div');
+			const bar = document.createElement('i');
+			const value = document.createElement('strong');
+
+			item.className = 'vt-horizontal-row';
+			label.className = 'vt-horizontal-label';
+			track.className = 'vt-horizontal-track';
+			bar.className = 'vt-horizontal-bar';
+			value.className = 'vt-horizontal-value';
+
+			label.textContent = row.label;
+			bar.style.width = `${Math.max(5, (Number(row.value) / max) * 100)}%`;
+			bar.style.backgroundColor = colors[index % colors.length];
+			value.textContent = valueLabel(row.value);
+
+			track.append(bar);
+			item.append(label, track, value);
+			target.append(item);
+		});
+	};
+
 	const groupedTableHours = (key) => {
-		const groups = tableRecords().reduce((result, row) => {
+		const groups = tableRecords().filter((row) => row.hours > 0).reduce((result, row) => {
 			result[row[key]] = (result[row[key]] || 0) + row.hours;
 
 			return result;
@@ -186,57 +259,35 @@
 
 	const updateRoleCards = () => {
 		const rows = tableRecords().filter((row) => row.role);
-		const roleCoverageSelect = document.getElementById('vt-role-coverage-role');
-		const roleCoverageCount = document.getElementById('vt-role-coverage-count');
-		const roleCoverageCaption = document.getElementById('vt-role-coverage-caption');
+		const roleCoverageEventSelect = document.getElementById('vt-role-coverage-event');
+		const roleCoverageChart = document.getElementById('vt-role-coverage-chart');
 		const volunteerSelect = document.getElementById('vt-volunteer-role-volunteer');
-		const volunteerRoleSelect = document.getElementById('vt-volunteer-role-role');
-		const volunteerRoleCount = document.getElementById('vt-volunteer-role-count');
-		const volunteerRoleCaption = document.getElementById('vt-volunteer-role-caption');
-		const roles = uniqueValues(rows, 'role');
+		const volunteerRoleChart = document.getElementById('vt-volunteer-role-chart');
+		const eventLabels = [...new Set(rows.map(eventLabel).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 		const volunteers = uniqueValues(rows, 'volunteer');
 
-		if (!roleCoverageSelect || !volunteerSelect || !volunteerRoleSelect) {
+		if (!roleCoverageEventSelect || !roleCoverageChart || !volunteerSelect || !volunteerRoleChart) {
 			return;
 		}
 
-		const selectedCoverageRole = roleCoverageSelect.value || roles[0] || '';
+		const selectedEvent = roleCoverageEventSelect.value || 'all';
 		const selectedVolunteer = volunteerSelect.value || volunteers[0] || '';
-		const selectedVolunteerRole = volunteerRoleSelect.value || roles[0] || '';
 
-		fillSelect(roleCoverageSelect, roles);
+		fillSelect(roleCoverageEventSelect, ['all', ...eventLabels]);
+		roleCoverageEventSelect.querySelector('option[value="all"]').textContent = 'All Events';
 		fillSelect(volunteerSelect, volunteers);
-		fillSelect(volunteerRoleSelect, roles);
 
-		roleCoverageSelect.value = roles.includes(selectedCoverageRole) ? selectedCoverageRole : (roles[0] || '');
+		roleCoverageEventSelect.value = selectedEvent === 'all' || eventLabels.includes(selectedEvent) ? selectedEvent : 'all';
 		volunteerSelect.value = volunteers.includes(selectedVolunteer) ? selectedVolunteer : (volunteers[0] || '');
-		volunteerRoleSelect.value = roles.includes(selectedVolunteerRole) ? selectedVolunteerRole : (roles[0] || '');
 
-		const rolePeople = new Set(rows
-			.filter((row) => row.role === roleCoverageSelect.value)
-			.map((row) => row.volunteer));
+		const eventRows = roleCoverageEventSelect.value === 'all'
+			? rows
+			: rows.filter((row) => eventLabel(row) === roleCoverageEventSelect.value);
+		const rolePeopleRows = countRows(eventRows, 'role', (row) => new Set([row.volunteer]));
+		const volunteerRoleRows = countRows(rows.filter((row) => row.volunteer === volunteerSelect.value), 'role');
 
-		const volunteerRoleMatches = rows.filter((row) => row.volunteer === volunteerSelect.value && row.role === volunteerRoleSelect.value);
-
-		if (roleCoverageCount) {
-			roleCoverageCount.textContent = String(rolePeople.size);
-		}
-
-		if (roleCoverageCaption) {
-			roleCoverageCaption.textContent = roleCoverageSelect.value
-				? `${rolePeople.size} people have served as ${roleCoverageSelect.value}.`
-				: 'No role records are available yet.';
-		}
-
-		if (volunteerRoleCount) {
-			volunteerRoleCount.textContent = String(volunteerRoleMatches.length);
-		}
-
-		if (volunteerRoleCaption) {
-			volunteerRoleCaption.textContent = volunteerSelect.value && volunteerRoleSelect.value
-				? `${volunteerSelect.value} has served as ${volunteerRoleSelect.value} ${volunteerRoleMatches.length} time(s).`
-				: 'Select a volunteer and role once records have been saved.';
-		}
+		drawHorizontalBars(roleCoverageChart, rolePeopleRows, 'No role records are available for this event yet.');
+		drawHorizontalBars(volunteerRoleChart, volunteerRoleRows, 'Select a volunteer once records have been saved.');
 	};
 
 	const drawPie = (canvas, rows) => {
@@ -305,9 +356,8 @@
 		document.getElementById('vt-event-export')?.addEventListener('click', exportEventCsv);
 		document.getElementById('vt-report-export')?.addEventListener('click', exportReportCsv);
 		[
-			document.getElementById('vt-role-coverage-role'),
+			document.getElementById('vt-role-coverage-event'),
 			document.getElementById('vt-volunteer-role-volunteer'),
-			document.getElementById('vt-volunteer-role-role'),
 		].forEach((select) => select?.addEventListener('change', updateRoleCards));
 
 		updateRoleCards();

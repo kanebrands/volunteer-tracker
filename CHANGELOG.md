@@ -2,6 +2,13 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.16
+
+- Reworked People by Role into a left-to-right horizontal bar chart by role.
+- Added an event filter to People by Role so role counts can be scoped to one event or all events.
+- Reworked Volunteer Role Count into a left-to-right horizontal bar chart by role for the selected volunteer.
+- Fixed role-card data population so records with full-name volunteers and optional zero-hour entries are included in role counts.
+
 ## 1.0.15
 
 - Optimized Volunteer Input and Event Input repeated-entry workflow: **Save** now stores the current record and returns to a blank input form for the next entry.

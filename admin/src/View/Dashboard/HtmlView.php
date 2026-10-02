@@ -17,7 +17,7 @@ class HtmlView extends BaseHtmlView
 	protected object $stats;
 	protected array $eventChart = [];
 	protected array $volunteerChart = [];
-	protected string $extensionVersion = '1.0.15';
+	protected string $extensionVersion = '1.0.16';
 
 	public function display($tpl = null): void
 	{

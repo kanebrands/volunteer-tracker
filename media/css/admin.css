@@ -346,6 +346,55 @@
 	margin: 0;
 }
 
+.vt-horizontal-chart {
+	display: grid;
+	gap: .7rem;
+}
+
+.vt-horizontal-row {
+	align-items: center;
+	display: grid;
+	gap: .75rem;
+	grid-template-columns: minmax(7rem, 32%) minmax(8rem, 1fr) minmax(2rem, auto);
+}
+
+.vt-horizontal-label {
+	color: #17232d;
+	font-size: .9rem;
+	font-weight: 700;
+	overflow-wrap: anywhere;
+}
+
+.vt-horizontal-track {
+	background: #edf3f5;
+	border-radius: 999px;
+	height: .95rem;
+	overflow: hidden;
+}
+
+.vt-horizontal-bar {
+	border-radius: inherit;
+	display: block;
+	height: 100%;
+	min-width: .35rem;
+}
+
+.vt-horizontal-value {
+	color: #050d5c;
+	font-size: .95rem;
+	font-weight: 700;
+	text-align: right;
+}
+
+.vt-horizontal-empty {
+	background: #f7faf9;
+	border: 1px solid #d9e5e2;
+	border-radius: 8px;
+	color: #52636d;
+	padding: 1rem;
+	text-align: center;
+}
+
 .vt-panel-alert,
 .vt-panel-message {
 	background: #f7faf9;
@@ -518,6 +567,10 @@
 
 	.vt-role-card-body-split {
 		grid-template-columns: 1fr;
+	}
+
+	.vt-horizontal-row {
+		grid-template-columns: 1fr minmax(4rem, 1fr) minmax(2rem, auto);
 	}
 
 	.vt-report-filter {
