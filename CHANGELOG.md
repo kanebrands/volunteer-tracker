@@ -2,6 +2,16 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.18
+
+- Added dashboard Volunteer Records filtering by event.
+- Added dashboard Event Records filtering by start and end date.
+- Added dashboard table page-size controls for 10, 50, 100, and all rows.
+- Added pagination controls to Volunteer Records and Event Records.
+- Added clickable sortable table headings with active direction indicators.
+- Set Volunteer Records to default to event-date sorting with 50 visible rows.
+- Set Event Records to default to event-date sorting with a current-date plus/minus one-year date window and 10 visible rows.
+
 ## 1.0.17
 
 - Sorted event dropdowns in calendar order by event date.

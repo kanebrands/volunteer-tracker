@@ -8,7 +8,7 @@
 
 	const getRows = () => [...document.querySelectorAll('#vt-records tbody tr')]
 		.filter((row) => row.querySelectorAll('td').length >= 5)
-		.map((row) => [...row.querySelectorAll('td')].slice(0, 5).map((cell) => cell.innerText.trim().replace(/\s+/g, ' ')));
+		.map((row) => [...row.querySelectorAll('td')].slice(0, 5).map((cell) => cell.textContent.trim().replace(/\s+/g, ' ')));
 
 	const numberValue = (value) => Number(String(value || '0').replace(/,/g, '')) || 0;
 
@@ -38,6 +38,191 @@
 			select.append(option);
 		});
 	};
+
+	const cellValue = (row, index) => {
+		const cell = row.children[index];
+
+		return cell?.dataset.sortValue ?? cell?.textContent.trim().replace(/\s+/g, ' ') ?? '';
+	};
+
+	const compareValues = (a, b, type) => {
+		if (type === 'number') {
+			return numberValue(a) - numberValue(b);
+		}
+
+		if (type === 'date') {
+			const aTime = a ? Date.parse(a) : Number.MAX_SAFE_INTEGER;
+			const bTime = b ? Date.parse(b) : Number.MAX_SAFE_INTEGER;
+
+			return aTime - bTime;
+		}
+
+		return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+	};
+
+	const csvFromRows = (headers, rows, columnCount) => {
+		const dataRows = rows.map((row) => [...row.querySelectorAll('td')]
+			.slice(0, columnCount)
+			.map((cell) => cell.textContent.trim().replace(/\s+/g, ' ')));
+
+		return [headers, ...dataRows]
+			.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+			.join('\n');
+	};
+
+	const downloadCsv = (csv, filename) => {
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const link = document.createElement('a');
+
+		link.href = URL.createObjectURL(blob);
+		link.download = filename;
+		link.click();
+		URL.revokeObjectURL(link.href);
+	};
+
+	const makeManagedTable = ({
+		tableId,
+		pageSizeId,
+		paginationId,
+		defaultSortIndex,
+		defaultSortType = 'text',
+		filters = [],
+	}) => {
+		const table = document.getElementById(tableId);
+		const pageSize = document.getElementById(pageSizeId);
+		const pagination = document.getElementById(paginationId);
+
+		if (!table || !pageSize || !pagination) {
+			return null;
+		}
+
+		const tbody = table.querySelector('tbody');
+		const allRows = [...tbody.querySelectorAll('tr')].filter((row) => row.querySelectorAll('td').length > 1);
+		const sortButtons = [...table.querySelectorAll('.vt-sort')];
+		const state = {
+			filteredRows: [...allRows],
+			page: 1,
+			sortIndex: defaultSortIndex,
+			sortType: defaultSortType,
+			sortDirection: 'asc',
+		};
+
+		const runFilters = () => allRows.filter((row) => filters.every((filter) => filter(row)));
+
+		const sortRows = (rows) => {
+			const multiplier = state.sortDirection === 'asc' ? 1 : -1;
+
+			return [...rows].sort((a, b) => {
+				const result = compareValues(cellValue(a, state.sortIndex), cellValue(b, state.sortIndex), state.sortType);
+
+				return result * multiplier;
+			});
+		};
+
+		const updateSortIndicators = () => {
+			sortButtons.forEach((button) => {
+				const indicator = button.querySelector('span');
+				const active = Number(button.dataset.sortIndex) === state.sortIndex;
+
+				button.classList.toggle('is-active', active);
+				button.setAttribute('aria-sort', active ? (state.sortDirection === 'asc' ? 'ascending' : 'descending') : 'none');
+				if (indicator) {
+					indicator.textContent = active ? (state.sortDirection === 'asc' ? '▼' : '▲') : '';
+				}
+			});
+		};
+
+		const renderPagination = (totalRows, totalPages) => {
+			pagination.innerHTML = '';
+
+			const count = document.createElement('span');
+			count.textContent = `${totalRows} record${totalRows === 1 ? '' : 's'}`;
+			pagination.append(count);
+
+			if (totalPages <= 1) {
+				return;
+			}
+
+			const previous = document.createElement('button');
+			const next = document.createElement('button');
+			previous.className = 'btn btn-sm btn-outline-primary';
+			next.className = 'btn btn-sm btn-outline-primary';
+			previous.type = 'button';
+			next.type = 'button';
+			previous.textContent = 'Previous';
+			next.textContent = 'Next';
+			previous.disabled = state.page <= 1;
+			next.disabled = state.page >= totalPages;
+
+			const pageLabel = document.createElement('strong');
+			pageLabel.textContent = `Page ${state.page} of ${totalPages}`;
+
+			previous.addEventListener('click', () => {
+				state.page = Math.max(1, state.page - 1);
+				render();
+			});
+			next.addEventListener('click', () => {
+				state.page = Math.min(totalPages, state.page + 1);
+				render();
+			});
+
+			pagination.append(previous, pageLabel, next);
+		};
+
+		const render = () => {
+			const limit = pageSize.value === 'all' ? Infinity : Number(pageSize.value) || 10;
+			state.filteredRows = sortRows(runFilters());
+
+			const totalRows = state.filteredRows.length;
+			const totalPages = Number.isFinite(limit) ? Math.max(1, Math.ceil(totalRows / limit)) : 1;
+			state.page = Math.min(state.page, totalPages);
+
+			const start = Number.isFinite(limit) ? (state.page - 1) * limit : 0;
+			const visibleRows = new Set(Number.isFinite(limit) ? state.filteredRows.slice(start, start + limit) : state.filteredRows);
+
+			allRows.forEach((row) => {
+				row.hidden = !visibleRows.has(row);
+			});
+
+			state.filteredRows.forEach((row) => tbody.append(row));
+			updateSortIndicators();
+			renderPagination(totalRows, totalPages);
+		};
+
+		sortButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				const index = Number(button.dataset.sortIndex);
+
+				if (state.sortIndex === index) {
+					state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+				} else {
+					state.sortIndex = index;
+					state.sortType = button.dataset.sortType || 'text';
+					state.sortDirection = 'asc';
+				}
+
+				state.page = 1;
+				render();
+			});
+		});
+
+		pageSize.addEventListener('change', () => {
+			state.page = 1;
+			render();
+		});
+
+		return {
+			render,
+			resetPage: () => {
+				state.page = 1;
+				render();
+			},
+			filteredRows: () => state.filteredRows,
+		};
+	};
+
+	let volunteerTableManager = null;
+	let eventTableManager = null;
 
 	const eventLabel = (row) => [row.event, row.eventDate].filter(Boolean).join(' - ');
 
@@ -147,15 +332,10 @@
 
 	const exportCsv = () => {
 		const headers = ['Volunteer', 'Event', 'Event Date', 'Hours', 'Role'];
-		const rows = [headers, ...getRows()];
-		const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-		const link = document.createElement('a');
+		const rows = volunteerTableManager?.filteredRows() || [...document.querySelectorAll('#vt-records tbody tr')];
+		const csv = csvFromRows(headers, rows, 5);
 
-		link.href = URL.createObjectURL(blob);
-		link.download = `volunteer-tracker-${new Date().toISOString().slice(0, 10)}.csv`;
-		link.click();
-		URL.revokeObjectURL(link.href);
+		downloadCsv(csv, `volunteer-tracker-${new Date().toISOString().slice(0, 10)}.csv`);
 	};
 
 	const exportEventCsv = () => {
@@ -166,17 +346,10 @@
 		}
 
 		const headers = ['Event', 'Event Date', 'Event Location', 'Volunteer Entries', 'Total Hours'];
-		const rows = [...table.querySelectorAll('tbody tr')]
-			.filter((row) => row.querySelectorAll('td').length >= 5)
-			.map((row) => [...row.querySelectorAll('td')].slice(0, 5).map((cell) => cell.innerText.trim().replace(/\s+/g, ' ')));
-		const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-		const link = document.createElement('a');
+		const rows = eventTableManager?.filteredRows() || [...table.querySelectorAll('tbody tr')];
+		const csv = csvFromRows(headers, rows.filter((row) => row.querySelectorAll('td').length >= 5), 5);
 
-		link.href = URL.createObjectURL(blob);
-		link.download = `volunteer-tracker-events-${new Date().toISOString().slice(0, 10)}.csv`;
-		link.click();
-		URL.revokeObjectURL(link.href);
+		downloadCsv(csv, `volunteer-tracker-events-${new Date().toISOString().slice(0, 10)}.csv`);
 	};
 
 	const exportReportCsv = () => {
@@ -189,16 +362,10 @@
 		const headers = ['Volunteer', 'Role'];
 		const rows = [...table.querySelectorAll('tbody tr')]
 			.filter((row) => row.querySelectorAll('td').length === 2)
-			.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.innerText.trim().replace(/\s+/g, ' ')));
+			.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent.trim().replace(/\s+/g, ' ')));
 		const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
 		const name = String(table.dataset.reportName || 'event').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'event';
-		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-		const link = document.createElement('a');
-
-		link.href = URL.createObjectURL(blob);
-		link.download = `volunteer-tracker-${name}-roles.csv`;
-		link.click();
-		URL.revokeObjectURL(link.href);
+		downloadCsv(csv, `volunteer-tracker-${name}-roles.csv`);
 	};
 
 	const emptyState = (ctx, canvas) => {
@@ -352,6 +519,67 @@
 	};
 
 	const init = () => {
+		const volunteerEventFilter = document.getElementById('vt-record-event-filter');
+		const eventStartDate = document.getElementById('vt-event-start-date');
+		const eventEndDate = document.getElementById('vt-event-end-date');
+		const formatDate = (date) => [
+			date.getFullYear(),
+			String(date.getMonth() + 1).padStart(2, '0'),
+			String(date.getDate()).padStart(2, '0'),
+		].join('-');
+
+		if (eventStartDate && !eventStartDate.value) {
+			const start = new Date();
+			start.setFullYear(start.getFullYear() - 1);
+			eventStartDate.value = formatDate(start);
+		}
+
+		if (eventEndDate && !eventEndDate.value) {
+			const end = new Date();
+			end.setFullYear(end.getFullYear() + 1);
+			eventEndDate.value = formatDate(end);
+		}
+
+		volunteerTableManager = makeManagedTable({
+			tableId: 'vt-records',
+			pageSizeId: 'vt-record-page-size',
+			paginationId: 'vt-record-pagination',
+			defaultSortIndex: 2,
+			defaultSortType: 'date',
+			filters: [
+				(row) => !volunteerEventFilter || volunteerEventFilter.value === 'all' || row.dataset.eventId === volunteerEventFilter.value,
+			],
+		});
+
+		eventTableManager = makeManagedTable({
+			tableId: 'vt-event-records',
+			pageSizeId: 'vt-event-page-size',
+			paginationId: 'vt-event-pagination',
+			defaultSortIndex: 1,
+			defaultSortType: 'date',
+			filters: [
+				(row) => {
+					const date = row.dataset.eventDate || '';
+
+					if (eventStartDate?.value && (!date || date < eventStartDate.value)) {
+						return false;
+					}
+
+					if (eventEndDate?.value && (!date || date > eventEndDate.value)) {
+						return false;
+					}
+
+					return true;
+				},
+			],
+		});
+
+		volunteerEventFilter?.addEventListener('change', () => volunteerTableManager?.resetPage());
+		eventStartDate?.addEventListener('change', () => eventTableManager?.resetPage());
+		eventEndDate?.addEventListener('change', () => eventTableManager?.resetPage());
+		volunteerTableManager?.render();
+		eventTableManager?.render();
+
 		document.getElementById('vt-export')?.addEventListener('click', exportCsv);
 		document.getElementById('vt-event-export')?.addEventListener('click', exportEventCsv);
 		document.getElementById('vt-report-export')?.addEventListener('click', exportReportCsv);
