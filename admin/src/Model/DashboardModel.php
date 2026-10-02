@@ -16,7 +16,7 @@ class DashboardModel extends BaseDatabaseModel
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->quoteName('#__volunteertracker_entries'))
-			->order($db->quoteName('event_date') . ' DESC, ' . $db->quoteName('volunteer_name') . ' ASC');
+			->order($db->quoteName('event_date') . ' IS NULL ASC, ' . $db->quoteName('event_date') . ' ASC, ' . $db->quoteName('event_name') . ' ASC, ' . $db->quoteName('volunteer_name') . ' ASC');
 
 		$db->setQuery($query);
 
@@ -44,7 +44,7 @@ class DashboardModel extends BaseDatabaseModel
 				$db->quoteName('events.event_date'),
 				$db->quoteName('events.event_location'),
 			])
-			->order($db->quoteName('events.event_date') . ' DESC, ' . $db->quoteName('events.event_name') . ' ASC');
+			->order($db->quoteName('events.event_date') . ' IS NULL ASC, ' . $db->quoteName('events.event_date') . ' ASC, ' . $db->quoteName('events.event_name') . ' ASC');
 
 		$db->setQuery($query);
 

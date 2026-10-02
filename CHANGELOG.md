@@ -2,6 +2,12 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.17
+
+- Sorted event dropdowns in calendar order by event date.
+- Kept events without dates at the bottom of event dropdown lists.
+- Updated the dashboard role-card event filter to follow calendar order instead of alphabetical label order.
+
 ## 1.0.16
 
 - Reworked People by Role into a left-to-right horizontal bar chart by role.

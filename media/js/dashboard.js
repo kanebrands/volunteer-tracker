@@ -263,7 +263,7 @@
 		const roleCoverageChart = document.getElementById('vt-role-coverage-chart');
 		const volunteerSelect = document.getElementById('vt-volunteer-role-volunteer');
 		const volunteerRoleChart = document.getElementById('vt-volunteer-role-chart');
-		const eventLabels = [...new Set(rows.map(eventLabel).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+		const eventLabels = [...new Set(rows.map(eventLabel).filter(Boolean))];
 		const volunteers = uniqueValues(rows, 'volunteer');
 
 		if (!roleCoverageEventSelect || !roleCoverageChart || !volunteerSelect || !volunteerRoleChart) {

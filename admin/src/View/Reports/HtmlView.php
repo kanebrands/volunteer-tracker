@@ -40,7 +40,7 @@ class HtmlView extends BaseHtmlView
 	{
 		$base = Uri::root(true) . '/media/com_volunteertracker';
 
-		$this->getDocument()->addCustomTag('<link rel="stylesheet" href="' . $base . '/css/admin.css?v=1.0.16">');
-		$this->getDocument()->addCustomTag('<script src="' . $base . '/js/dashboard.js?v=1.0.16" defer></script>');
+		$this->getDocument()->addCustomTag('<link rel="stylesheet" href="' . $base . '/css/admin.css?v=1.0.17">');
+		$this->getDocument()->addCustomTag('<script src="' . $base . '/js/dashboard.js?v=1.0.17" defer></script>');
 	}
 }

@@ -95,7 +95,7 @@ class VolunteerModel extends BaseDatabaseModel
 				$db->quoteName('event_location'),
 			])
 			->from($db->quoteName('#__volunteertracker_events'))
-			->order($db->quoteName('event_date') . ' DESC, ' . $db->quoteName('event_name') . ' ASC');
+			->order($db->quoteName('event_date') . ' IS NULL ASC, ' . $db->quoteName('event_date') . ' ASC, ' . $db->quoteName('event_name') . ' ASC');
 
 		$db->setQuery($query);
 
