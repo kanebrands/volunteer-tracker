@@ -56,7 +56,7 @@ class EventController extends BaseController
 		$app->enqueueMessage(Text::_('COM_VOLUNTEERTRACKER_EVENT_SAVE_SUCCESS'), 'message');
 
 		if ($this->getTask() === 'apply') {
-			$this->setRedirect(Route::_('index.php?option=com_volunteertracker&view=event&layout=edit&id=' . (int) $id, false));
+			$this->setRedirect(Route::_('index.php?option=com_volunteertracker&view=event&layout=edit', false));
 
 			return;
 		}

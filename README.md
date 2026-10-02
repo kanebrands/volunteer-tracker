@@ -1,56 +1,50 @@
 # Volunteer Tracker
 
-Volunteer Tracker is an administrator-only Joomla component for recording volunteer hours by person and event. It provides a dashboard for summary totals, charts, searchable records, record editing, deletion, and CSV export.
+Volunteer Tracker is an administrator-only Joomla component for planning events, recording volunteer service, tracking roles, and exporting simple reports.
 
-## Minimum Requirements
+## Requirements
 
 - Joomla 5.x
 - PHP 8.1 or newer
 - MySQL or MariaDB supported by Joomla 5
-- Administrator access to install Joomla extensions
-- A user account with the needed Joomla permissions for `com_volunteertracker`
+- Joomla administrator access to install extensions
+- Joomla permissions for `com_volunteertracker` when access is delegated to non-super-user administrators
 
 ## Installation
 
-1. Clone or download this source folder.
-2. Create the installable package from the project root:
+1. Download the latest release ZIP from [Volunteer Tracker Releases](https://github.com/kanebrands/volunteer-tracker/releases).
+2. In the Joomla administrator area, go to **System > Install > Extensions**.
+3. Upload and install the downloaded `com_volunteertracker` ZIP file.
+4. Open **Components > Volunteer Tracker**.
+5. Configure Joomla permissions for the component if additional administrators need access.
 
-   ```sh
-   mkdir -p dist
-   rm -f dist/com_volunteertracker-1.0.14.zip
-   zip -r dist/com_volunteertracker-1.0.14.zip admin media updates com_volunteertracker.xml -x "*.DS_Store"
-   ```
+The installer creates the required Volunteer Tracker database tables automatically.
 
-3. In the Joomla administrator area, go to **System > Install > Extensions**.
-4. Upload and install `dist/com_volunteertracker-1.0.14.zip`.
-5. Open **Components > Volunteer Tracker**.
-6. Configure Joomla permissions for the component if non-super-user administrators need access.
+## Features
 
-The component installer creates the `#__volunteertracker_entries` database table automatically.
-
-## Capabilities and Features
-
-- Administrator-only dashboard for volunteer tracking.
-- Add and edit volunteer records with volunteer name, event name, event date, hours, and role.
-- Autocomplete volunteer, event, and role inputs from prior saved records.
-- Generate event reports listing volunteers and assigned roles, with CSV export.
-- Delete selected records with Joomla permission checks.
-- Summary metrics for total volunteers, total events, cumulative hours, and average hours per entry.
-- Bar chart of hours by event.
-- Pie chart of hours by volunteer.
-- CSV export of the dashboard table.
+- Modern administrator dashboard with summary panels, chart panels, and record tables.
+- Event input screen for event name, event date, and event location.
+- Volunteer input screen for volunteer name, event, role, and optional hours.
+- Fast repeated entry workflow: use **Save** to store a record and immediately continue with a blank input form.
+- Event-backed volunteer records so event names and dates stay consistent across reports.
+- Unique event enforcement by event name and event date.
+- Dashboard charts for hours by event and hours by volunteer, with independent display limits.
+- Dashboard cards for role participation and volunteer role counts.
+- Volunteer Records table with CSV export, edit actions, and delete actions.
+- Event Records table with CSV export, edit actions, and delete actions.
+- Event deletion also removes associated volunteer records after confirmation.
+- Event Role Report with role/name sorting and CSV export.
 - Joomla access-control actions for administer, manage, create, edit, and delete.
-- Joomla update-server metadata for GitHub-hosted release packages.
-- Install, update, and uninstall SQL scripts for the component table.
+- Joomla update metadata for GitHub-hosted release packages.
 
-## Release Packages
+## Updates
 
-Release ZIP files should be saved in the `dist/` folder. That folder is intentionally ignored by Git so generated packages are not committed with the source.
+Volunteer Tracker is configured for GitHub-hosted releases:
 
-Before publishing a GitHub release, update these placeholder URLs with the real GitHub owner and repository:
+- Releases: [https://github.com/kanebrands/volunteer-tracker/releases](https://github.com/kanebrands/volunteer-tracker/releases)
+- Update feed source: `updates/com_volunteertracker.xml`
 
-- `com_volunteertracker.xml`
-- `updates/com_volunteertracker.xml`
+Install future release ZIP files through Joomla's extension installer, or use Joomla's extension update workflow once the public update feed is available from the repository.
 
 ## Removal
 
@@ -60,6 +54,6 @@ To remove the installed component from Joomla:
 2. Search for **Volunteer Tracker**.
 3. Select the component and choose **Uninstall**.
 
-The uninstall script drops the `#__volunteertracker_entries` table. Export any volunteer data you need before uninstalling.
+The uninstall script removes the Volunteer Tracker database tables. Export any volunteer or event data you need before uninstalling.
 
-To remove the source from a development machine, delete this source folder after confirming any needed changes have been committed or backed up. Generated release packages can be removed by deleting the ignored `dist/` folder.
+To remove the source from a development machine, delete this source folder after confirming any needed changes have been committed or backed up.

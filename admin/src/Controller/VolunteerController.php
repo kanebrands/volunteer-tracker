@@ -56,7 +56,7 @@ class VolunteerController extends BaseController
 		$app->enqueueMessage(Text::_('COM_VOLUNTEERTRACKER_SAVE_SUCCESS'), 'message');
 
 		if ($this->getTask() === 'apply') {
-			$this->setRedirect(Route::_('index.php?option=com_volunteertracker&view=volunteer&layout=edit&id=' . (int) $id, false));
+			$this->setRedirect(Route::_('index.php?option=com_volunteertracker&view=volunteer&layout=edit', false));
 
 			return;
 		}
