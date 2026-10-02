@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+	<name>COM_VOLUNTEERTRACKER</name>
+	<author>Codex</author>
+	<creationDate>2026-10-02</creationDate>
+	<copyright>(C) 2026. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later</license>
+	<authorEmail></authorEmail>
+	<authorUrl></authorUrl>
+	<version>1.0.0</version>
+	<description>COM_VOLUNTEERTRACKER_XML_DESCRIPTION</description>
+	<namespace path="src">VolunteerTracker\Component\VolunteerTracker</namespace>
+
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">admin/sql/install/mysql/install.sql</file>
+		</sql>
+	</install>
+
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">admin/sql/uninstall/mysql/uninstall.sql</file>
+		</sql>
+	</uninstall>
+
+	<update>
+		<schemas>
+			<schemapath type="mysql">admin/sql/updates/mysql</schemapath>
+		</schemas>
+	</update>
+
+	<administration>
+		<menu img="class:users">COM_VOLUNTEERTRACKER</menu>
+		<files folder="admin">
+			<filename>access.xml</filename>
+			<folder>language</folder>
+			<folder>services</folder>
+			<folder>sql</folder>
+			<folder>src</folder>
+			<folder>tmpl</folder>
+		</files>
+	</administration>
+
+	<media destination="com_volunteertracker" folder="media">
+		<filename>joomla.asset.json</filename>
+		<folder>css</folder>
+		<folder>js</folder>
+	</media>
+
+	<updateservers>
+		<server type="extension" priority="1" name="Volunteer Tracker GitHub Updates">https://raw.githubusercontent.com/YOUR_GITHUB_USER/YOUR_REPOSITORY/main/updates/com_volunteertracker.xml</server>
+	</updateservers>
+</extension>

@@ -1,0 +1,22 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "com_volunteertracker",
+	"version": "1.0.0",
+	"description": "Volunteer Tracker assets",
+	"license": "GPL-2.0-or-later",
+	"assets": [
+		{
+			"name": "com_volunteertracker.admin",
+			"type": "style",
+			"uri": "com_volunteertracker/css/admin.css"
+		},
+		{
+			"name": "com_volunteertracker.dashboard",
+			"type": "script",
+			"uri": "com_volunteertracker/js/dashboard.js",
+			"attributes": {
+				"defer": true
+			}
+		}
+	]
+}

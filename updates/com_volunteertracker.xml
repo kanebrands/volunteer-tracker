@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+	<update>
+		<name>Volunteer Tracker</name>
+		<description>Administrator-only Joomla component for tracking volunteer events and hours.</description>
+		<element>com_volunteertracker</element>
+		<type>component</type>
+		<version>1.0.0</version>
+		<client>administrator</client>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/YOUR_GITHUB_USER/YOUR_REPOSITORY/releases/download/v1.0.0/com_volunteertracker-1.0.0.zip</downloadurl>
+		</downloads>
+		<targetplatform name="joomla" version="5\.[0-9]+" />
+		<php_minimum>8.1</php_minimum>
+	</update>
+</updates>
