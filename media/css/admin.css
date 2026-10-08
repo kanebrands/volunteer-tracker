@@ -371,6 +371,13 @@
 	grid-template-columns: minmax(7rem, 32%) minmax(8rem, 1fr) minmax(2rem, auto);
 }
 
+.vt-horizontal-row-summary {
+	border-top: 1px solid #d9dde2;
+	grid-template-columns: 1fr auto;
+	margin-top: .15rem;
+	padding-top: .7rem;
+}
+
 .vt-horizontal-label {
 	color: #17232d;
 	font-size: .9rem;

@@ -275,23 +275,27 @@
 		rows.forEach((row, index) => {
 			const item = document.createElement('div');
 			const label = document.createElement('span');
-			const track = document.createElement('div');
-			const bar = document.createElement('i');
+			const track = row.summary ? null : document.createElement('div');
+			const bar = row.summary ? null : document.createElement('i');
 			const value = document.createElement('strong');
 
-			item.className = 'vt-horizontal-row';
+			item.className = row.summary ? 'vt-horizontal-row vt-horizontal-row-summary' : 'vt-horizontal-row';
 			label.className = 'vt-horizontal-label';
-			track.className = 'vt-horizontal-track';
-			bar.className = 'vt-horizontal-bar';
 			value.className = 'vt-horizontal-value';
 
 			label.textContent = row.label;
-			bar.style.width = `${Math.max(5, (Number(row.value) / max) * 100)}%`;
-			bar.style.backgroundColor = colors[index % colors.length];
+			if (!row.summary) {
+				track.className = 'vt-horizontal-track';
+				bar.className = 'vt-horizontal-bar';
+				bar.style.width = `${Math.max(5, (Number(row.value) / max) * 100)}%`;
+				bar.style.backgroundColor = colors[index % colors.length];
+				track.append(bar);
+				item.append(label, track, value);
+			} else {
+				item.append(label, value);
+			}
 			value.textContent = valueLabel(row.value);
 
-			track.append(bar);
-			item.append(label, track, value);
 			target.append(item);
 		});
 	};
@@ -452,6 +456,14 @@
 			: rows.filter((row) => eventLabel(row) === roleCoverageEventSelect.value);
 		const rolePeopleRows = countRows(eventRows, 'role', (row) => new Set([row.volunteer]));
 		const volunteerRoleRows = countRows(rows.filter((row) => row.volunteer === volunteerSelect.value), 'role');
+
+		if (roleCoverageEventSelect.value !== 'all' && eventRows.length) {
+			rolePeopleRows.push({
+				label: 'Total Volunteers',
+				value: new Set(eventRows.map((row) => row.volunteer).filter(Boolean)).size,
+				summary: true,
+			});
+		}
 
 		drawHorizontalBars(roleCoverageChart, rolePeopleRows, 'No role records are available for this event yet.');
 		drawHorizontalBars(volunteerRoleChart, volunteerRoleRows, 'Select a volunteer once records have been saved.');

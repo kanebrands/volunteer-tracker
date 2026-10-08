@@ -47,6 +47,7 @@ class VolunteerModel extends BaseDatabaseModel
 		$app = Factory::getApplication();
 		$now = Factory::getDate()->toSql();
 		$eventId = (string) ($data['event_id'] ?? '');
+		$duplicateAction = (string) ($data['duplicate_action'] ?? 'skip');
 
 		$row = (object) [
 			'id' => (int) ($data['id'] ?? 0),
@@ -63,7 +64,7 @@ class VolunteerModel extends BaseDatabaseModel
 		}
 
 		if ($eventId === 'all_active' && !$row->id) {
-			return $this->saveForAllActiveEvents($row, $now, (int) $app->getIdentity()->id);
+			return $this->saveForAllActiveEvents($row, $now, (int) $app->getIdentity()->id, $duplicateAction);
 		}
 
 		$event = $this->getEventById($row->event_id, !$row->id);
@@ -74,6 +75,19 @@ class VolunteerModel extends BaseDatabaseModel
 
 		$row->event_name = $event->event_name;
 		$row->event_date = $event->event_date;
+
+		$duplicate = $this->getDuplicateEntry($row->volunteer_name, $row->event_id, $row->id);
+
+		if ($duplicate) {
+			if ($duplicateAction !== 'overwrite') {
+				return (int) $duplicate->id;
+			}
+
+			$row->id = (int) $duplicate->id;
+			$db->updateObject('#__volunteertracker_entries', $row, 'id');
+
+			return $row->id;
+		}
 
 		if ($row->id) {
 			$db->updateObject('#__volunteertracker_entries', $row, 'id');
@@ -118,6 +132,28 @@ class VolunteerModel extends BaseDatabaseModel
 		return $this->getDistinctOptions('role');
 	}
 
+	public function getActiveAssignments(): array
+	{
+		$db = $this->getDatabase();
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('entries.id'),
+				$db->quoteName('entries.event_id'),
+				$db->quoteName('entries.volunteer_name'),
+				$db->quoteName('events.event_name'),
+				$db->quoteName('events.event_date'),
+			])
+			->from($db->quoteName('#__volunteertracker_entries', 'entries'))
+			->join('INNER', $db->quoteName('#__volunteertracker_events', 'events') . ' ON ' . $db->quoteName('events.id') . ' = ' . $db->quoteName('entries.event_id'))
+			->where($db->quoteName('events.is_archived') . ' = 0')
+			->order($db->quoteName('events.event_date') . ' IS NULL ASC, ' . $db->quoteName('events.event_date') . ' ASC, ' . $db->quoteName('events.event_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
 	public function delete(array $ids): void
 	{
 		$db = $this->getDatabase();
@@ -144,7 +180,7 @@ class VolunteerModel extends BaseDatabaseModel
 		return array_values(array_filter(array_map('strval', $db->loadColumn() ?: [])));
 	}
 
-	private function saveForAllActiveEvents(object $row, string $now, int $userId): int
+	private function saveForAllActiveEvents(object $row, string $now, int $userId, string $duplicateAction): int
 	{
 		$events = $this->getEventOptions();
 		$lastId = 0;
@@ -162,6 +198,19 @@ class VolunteerModel extends BaseDatabaseModel
 				'modified' => $now,
 				'modified_by' => $userId,
 			];
+
+			$duplicate = $this->getDuplicateEntry($entry->volunteer_name, $entry->event_id);
+
+			if ($duplicate) {
+				if ($duplicateAction === 'overwrite') {
+					$entry->id = (int) $duplicate->id;
+					$this->getDatabase()->updateObject('#__volunteertracker_entries', $entry, 'id');
+				}
+
+				$lastId = (int) $duplicate->id;
+
+				continue;
+			}
 
 			$this->getDatabase()->insertObject('#__volunteertracker_entries', $entry);
 			$lastId = (int) $this->getDatabase()->insertid();
@@ -195,5 +244,30 @@ class VolunteerModel extends BaseDatabaseModel
 		$event = $db->loadObject();
 
 		return $event ?: null;
+	}
+
+	private function getDuplicateEntry(string $volunteerName, int $eventId, int $excludeId = 0): ?object
+	{
+		if ($volunteerName === '' || !$eventId) {
+			return null;
+		}
+
+		$db = $this->getDatabase();
+		$query = $db->getQuery(true)
+			->select($db->quoteName('entries.id'))
+			->from($db->quoteName('#__volunteertracker_entries', 'entries'))
+			->join('INNER', $db->quoteName('#__volunteertracker_events', 'events') . ' ON ' . $db->quoteName('events.id') . ' = ' . $db->quoteName('entries.event_id'))
+			->where($db->quoteName('entries.event_id') . ' = ' . (int) $eventId)
+			->where('LOWER(TRIM(' . $db->quoteName('entries.volunteer_name') . ')) = ' . $db->quote(strtolower(trim($volunteerName))))
+			->where($db->quoteName('events.is_archived') . ' = 0');
+
+		if ($excludeId) {
+			$query->where($db->quoteName('entries.id') . ' <> ' . (int) $excludeId);
+		}
+
+		$db->setQuery($query, 0, 1);
+		$duplicate = $db->loadObject();
+
+		return $duplicate ?: null;
 	}
 }

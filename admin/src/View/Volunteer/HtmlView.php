@@ -15,6 +15,7 @@ class HtmlView extends BaseHtmlView
 	protected array $volunteerOptions = [];
 	protected array $eventOptions = [];
 	protected array $roleOptions = [];
+	protected array $activeAssignments = [];
 
 	public function display($tpl = null): void
 	{
@@ -22,6 +23,7 @@ class HtmlView extends BaseHtmlView
 		$this->volunteerOptions = $this->get('VolunteerOptions');
 		$this->eventOptions     = $this->get('EventOptions');
 		$this->roleOptions      = $this->get('RoleOptions');
+		$this->activeAssignments = $this->get('ActiveAssignments');
 		$this->addToolbar();
 		$this->loadAssets();
 
