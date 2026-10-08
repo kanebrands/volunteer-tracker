@@ -345,9 +345,9 @@
 			return;
 		}
 
-		const headers = ['Event', 'Event Date', 'Event Location', 'Volunteer Entries', 'Total Hours'];
+		const headers = ['Event', 'Event Date', 'Event Location', 'Status', 'Volunteer Entries', 'Total Hours'];
 		const rows = eventTableManager?.filteredRows() || [...table.querySelectorAll('tbody tr')];
-		const csv = csvFromRows(headers, rows.filter((row) => row.querySelectorAll('td').length >= 5), 5);
+		const csv = csvFromRows(headers, rows.filter((row) => row.querySelectorAll('td').length >= 6), 6);
 
 		downloadCsv(csv, `volunteer-tracker-events-${new Date().toISOString().slice(0, 10)}.csv`);
 	};
@@ -522,6 +522,7 @@
 		const volunteerEventFilter = document.getElementById('vt-record-event-filter');
 		const eventStartDate = document.getElementById('vt-event-start-date');
 		const eventEndDate = document.getElementById('vt-event-end-date');
+		const includeArchived = document.getElementById('vt-include-archived');
 		const formatDate = (date) => [
 			date.getFullYear(),
 			String(date.getMonth() + 1).padStart(2, '0'),
@@ -548,6 +549,7 @@
 			defaultSortType: 'date',
 			filters: [
 				(row) => !volunteerEventFilter || volunteerEventFilter.value === 'all' || row.dataset.eventId === volunteerEventFilter.value,
+				(row) => includeArchived?.checked || row.dataset.eventArchived !== '1',
 			],
 		});
 
@@ -559,6 +561,10 @@
 			defaultSortType: 'date',
 			filters: [
 				(row) => {
+					if (!includeArchived?.checked && row.dataset.eventArchived === '1') {
+						return false;
+					}
+
 					const date = row.dataset.eventDate || '';
 
 					if (eventStartDate?.value && (!date || date < eventStartDate.value)) {
@@ -575,6 +581,10 @@
 		});
 
 		volunteerEventFilter?.addEventListener('change', () => volunteerTableManager?.resetPage());
+		includeArchived?.addEventListener('change', () => {
+			volunteerTableManager?.resetPage();
+			eventTableManager?.resetPage();
+		});
 		eventStartDate?.addEventListener('change', () => eventTableManager?.resetPage());
 		eventEndDate?.addEventListener('change', () => eventTableManager?.resetPage());
 		volunteerTableManager?.render();

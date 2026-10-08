@@ -2,6 +2,15 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.19
+
+- Added active/archived status for events.
+- Excluded archived events from Volunteer Input event selection.
+- Added "All active events" Volunteer Input option to create matching volunteer records across every active event.
+- Added dashboard selector to include archived events in Volunteer Records and Event Records table displays.
+- Kept archived event entries included in dashboard statistics, charts, and role/hour calculations.
+- Added event status display and export support in Event Records.
+
 ## 1.0.18
 
 - Added dashboard Volunteer Records filtering by event.

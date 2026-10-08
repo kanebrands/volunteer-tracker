@@ -14,9 +14,13 @@ class DashboardModel extends BaseDatabaseModel
 		$db = $this->getDatabase();
 
 		$query = $db->getQuery(true)
-			->select('*')
-			->from($db->quoteName('#__volunteertracker_entries'))
-			->order($db->quoteName('event_date') . ' IS NULL ASC, ' . $db->quoteName('event_date') . ' ASC, ' . $db->quoteName('event_name') . ' ASC, ' . $db->quoteName('volunteer_name') . ' ASC');
+			->select([
+				$db->quoteName('entries') . '.*',
+				'COALESCE(' . $db->quoteName('events.is_archived') . ', 0) AS event_archived',
+			])
+			->from($db->quoteName('#__volunteertracker_entries', 'entries'))
+			->join('LEFT', $db->quoteName('#__volunteertracker_events', 'events') . ' ON ' . $db->quoteName('events.id') . ' = ' . $db->quoteName('entries.event_id'))
+			->order($db->quoteName('entries.event_date') . ' IS NULL ASC, ' . $db->quoteName('entries.event_date') . ' ASC, ' . $db->quoteName('entries.event_name') . ' ASC, ' . $db->quoteName('entries.volunteer_name') . ' ASC');
 
 		$db->setQuery($query);
 
@@ -33,6 +37,7 @@ class DashboardModel extends BaseDatabaseModel
 				$db->quoteName('events.event_name'),
 				$db->quoteName('events.event_date'),
 				$db->quoteName('events.event_location'),
+				$db->quoteName('events.is_archived'),
 				'COUNT(' . $db->quoteName('entries.id') . ') AS volunteer_entries',
 				'COALESCE(SUM(' . $db->quoteName('entries.hours') . '), 0) AS total_hours',
 			])
@@ -43,6 +48,7 @@ class DashboardModel extends BaseDatabaseModel
 				$db->quoteName('events.event_name'),
 				$db->quoteName('events.event_date'),
 				$db->quoteName('events.event_location'),
+				$db->quoteName('events.is_archived'),
 			])
 			->order($db->quoteName('events.event_date') . ' IS NULL ASC, ' . $db->quoteName('events.event_date') . ' ASC, ' . $db->quoteName('events.event_name') . ' ASC');
 

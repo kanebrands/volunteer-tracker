@@ -19,6 +19,7 @@ class EventModel extends BaseDatabaseModel
 			'event_name' => '',
 			'event_date' => '',
 			'event_location' => '',
+			'is_archived' => 0,
 		];
 
 		if (!$id) {
@@ -48,6 +49,7 @@ class EventModel extends BaseDatabaseModel
 			'event_name' => trim((string) ($data['event_name'] ?? '')),
 			'event_date' => trim((string) ($data['event_date'] ?? '')),
 			'event_location' => trim((string) ($data['event_location'] ?? '')),
+			'is_archived' => !empty($data['is_archived']) ? 1 : 0,
 			'modified' => $now,
 			'modified_by' => (int) $app->getIdentity()->id,
 		];

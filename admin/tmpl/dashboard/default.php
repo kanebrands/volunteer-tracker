@@ -113,6 +113,13 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 			</div>
 		</div>
 
+		<section class="vt-panel vt-dashboard-controls">
+			<label class="vt-check">
+				<input type="checkbox" id="vt-include-archived">
+				<span><?php echo Text::_('COM_VOLUNTEERTRACKER_INCLUDE_ARCHIVED_EVENTS'); ?></span>
+			</label>
+		</section>
+
 		<div class="vt-role-card-grid">
 			<section class="vt-panel vt-role-card">
 				<header>
@@ -268,7 +275,7 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 							</tr>
 						<?php endif; ?>
 						<?php foreach ($this->items as $i => $item) : ?>
-							<tr data-event-id="<?php echo (int) $item->event_id; ?>">
+							<tr data-event-id="<?php echo (int) $item->event_id; ?>" data-event-archived="<?php echo !empty($item->event_archived) ? '1' : '0'; ?>">
 								<td>
 									<a href="<?php echo Route::_('index.php?option=com_volunteertracker&task=volunteer.edit&id=' . (int) $item->id); ?>">
 										<?php echo htmlspecialchars($item->volunteer_name, ENT_QUOTES, 'UTF-8'); ?>
@@ -337,19 +344,20 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 							<th><button type="button" class="vt-sort" data-sort-index="0"><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_NAME'); ?><span aria-hidden="true"></span></button></th>
 							<th><button type="button" class="vt-sort" data-sort-index="1" data-sort-type="date"><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_DATE'); ?><span aria-hidden="true"></span></button></th>
 							<th><button type="button" class="vt-sort" data-sort-index="2"><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_LOCATION'); ?><span aria-hidden="true"></span></button></th>
-							<th class="text-end"><button type="button" class="vt-sort" data-sort-index="3" data-sort-type="number"><?php echo Text::_('COM_VOLUNTEERTRACKER_VOLUNTEER_ENTRIES'); ?><span aria-hidden="true"></span></button></th>
-							<th class="text-end"><button type="button" class="vt-sort" data-sort-index="4" data-sort-type="number"><?php echo Text::_('COM_VOLUNTEERTRACKER_TOTAL_HOURS'); ?><span aria-hidden="true"></span></button></th>
+							<th><button type="button" class="vt-sort" data-sort-index="3"><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_STATUS'); ?><span aria-hidden="true"></span></button></th>
+							<th class="text-end"><button type="button" class="vt-sort" data-sort-index="4" data-sort-type="number"><?php echo Text::_('COM_VOLUNTEERTRACKER_VOLUNTEER_ENTRIES'); ?><span aria-hidden="true"></span></button></th>
+							<th class="text-end"><button type="button" class="vt-sort" data-sort-index="5" data-sort-type="number"><?php echo Text::_('COM_VOLUNTEERTRACKER_TOTAL_HOURS'); ?><span aria-hidden="true"></span></button></th>
 							<th class="text-end"><?php echo Text::_('COM_VOLUNTEERTRACKER_ACTIONS'); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php if (!$this->events) : ?>
 							<tr>
-								<td colspan="6" class="text-center"><?php echo Text::_('COM_VOLUNTEERTRACKER_NO_EVENT_RECORDS'); ?></td>
+								<td colspan="7" class="text-center"><?php echo Text::_('COM_VOLUNTEERTRACKER_NO_EVENT_RECORDS'); ?></td>
 							</tr>
 						<?php endif; ?>
 						<?php foreach ($this->events as $event) : ?>
-							<tr data-event-date="<?php echo htmlspecialchars((string) $event->event_date, ENT_QUOTES, 'UTF-8'); ?>">
+							<tr data-event-date="<?php echo htmlspecialchars((string) $event->event_date, ENT_QUOTES, 'UTF-8'); ?>" data-event-archived="<?php echo !empty($event->is_archived) ? '1' : '0'; ?>">
 								<td>
 									<a href="<?php echo Route::_('index.php?option=com_volunteertracker&task=event.edit&id=' . (int) $event->id); ?>">
 										<?php echo htmlspecialchars($event->event_name, ENT_QUOTES, 'UTF-8'); ?>
@@ -357,6 +365,7 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 								</td>
 								<td data-sort-value="<?php echo htmlspecialchars((string) $event->event_date, ENT_QUOTES, 'UTF-8'); ?>"><?php echo $event->event_date ? HTMLHelper::_('date', $event->event_date, Text::_('DATE_FORMAT_LC4')) : ''; ?></td>
 								<td><?php echo htmlspecialchars((string) $event->event_location, ENT_QUOTES, 'UTF-8'); ?></td>
+								<td><?php echo Text::_(!empty($event->is_archived) ? 'COM_VOLUNTEERTRACKER_EVENT_ARCHIVED_STATUS' : 'COM_VOLUNTEERTRACKER_EVENT_ACTIVE_STATUS'); ?></td>
 								<td class="text-end" data-sort-value="<?php echo (int) $event->volunteer_entries; ?>"><?php echo (int) $event->volunteer_entries; ?></td>
 								<td class="text-end" data-sort-value="<?php echo htmlspecialchars((string) (float) $event->total_hours, ENT_QUOTES, 'UTF-8'); ?>"><?php echo number_format((float) $event->total_hours, 2); ?></td>
 								<td class="text-end">

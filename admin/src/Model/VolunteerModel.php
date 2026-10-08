@@ -46,19 +46,29 @@ class VolunteerModel extends BaseDatabaseModel
 		$db  = $this->getDatabase();
 		$app = Factory::getApplication();
 		$now = Factory::getDate()->toSql();
+		$eventId = (string) ($data['event_id'] ?? '');
 
 		$row = (object) [
 			'id' => (int) ($data['id'] ?? 0),
-			'event_id' => (int) ($data['event_id'] ?? 0),
+			'event_id' => (int) $eventId,
 			'volunteer_name' => trim((string) ($data['volunteer_name'] ?? '')),
 			'hours' => max(0, (float) ($data['hours'] ?? 0)),
 			'role' => trim((string) ($data['role'] ?? '')),
 			'modified' => $now,
 			'modified_by' => (int) $app->getIdentity()->id,
 		];
-		$event = $this->getEventById($row->event_id);
 
-		if ($row->volunteer_name === '' || !$event || $row->role === '') {
+		if ($row->volunteer_name === '' || $row->role === '') {
+			return 0;
+		}
+
+		if ($eventId === 'all_active' && !$row->id) {
+			return $this->saveForAllActiveEvents($row, $now, (int) $app->getIdentity()->id);
+		}
+
+		$event = $this->getEventById($row->event_id, !$row->id);
+
+		if (!$event) {
 			return 0;
 		}
 
@@ -95,6 +105,7 @@ class VolunteerModel extends BaseDatabaseModel
 				$db->quoteName('event_location'),
 			])
 			->from($db->quoteName('#__volunteertracker_events'))
+			->where($db->quoteName('is_archived') . ' = 0')
 			->order($db->quoteName('event_date') . ' IS NULL ASC, ' . $db->quoteName('event_date') . ' ASC, ' . $db->quoteName('event_name') . ' ASC');
 
 		$db->setQuery($query);
@@ -133,7 +144,33 @@ class VolunteerModel extends BaseDatabaseModel
 		return array_values(array_filter(array_map('strval', $db->loadColumn() ?: [])));
 	}
 
-	private function getEventById(int $id): ?object
+	private function saveForAllActiveEvents(object $row, string $now, int $userId): int
+	{
+		$events = $this->getEventOptions();
+		$lastId = 0;
+
+		foreach ($events as $event) {
+			$entry = (object) [
+				'event_id' => (int) $event->id,
+				'volunteer_name' => $row->volunteer_name,
+				'event_name' => $event->event_name,
+				'event_date' => $event->event_date,
+				'hours' => $row->hours,
+				'role' => $row->role,
+				'created' => $now,
+				'created_by' => $userId,
+				'modified' => $now,
+				'modified_by' => $userId,
+			];
+
+			$this->getDatabase()->insertObject('#__volunteertracker_entries', $entry);
+			$lastId = (int) $this->getDatabase()->insertid();
+		}
+
+		return $lastId;
+	}
+
+	private function getEventById(int $id, bool $activeOnly = false): ?object
 	{
 		if (!$id) {
 			return null;
@@ -149,6 +186,10 @@ class VolunteerModel extends BaseDatabaseModel
 			])
 			->from($db->quoteName('#__volunteertracker_events'))
 			->where($db->quoteName('id') . ' = ' . (int) $id);
+
+		if ($activeOnly) {
+			$query->where($db->quoteName('is_archived') . ' = 0');
+		}
 
 		$db->setQuery($query);
 		$event = $db->loadObject();

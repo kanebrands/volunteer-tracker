@@ -23,6 +23,10 @@ use Joomla\CMS\Router\Route;
 					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_LOCATION'); ?></span>
 					<input class="form-control" type="text" name="jform[event_location]" value="<?php echo htmlspecialchars((string) $this->item->event_location, ENT_QUOTES, 'UTF-8'); ?>">
 				</label>
+				<label class="vt-check">
+					<input type="checkbox" name="jform[is_archived]" value="1" <?php echo !empty($this->item->is_archived) ? 'checked' : ''; ?>>
+					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_ARCHIVED'); ?></span>
+				</label>
 			</div>
 		</section>
 	</div>

@@ -19,6 +19,9 @@ use Joomla\CMS\Router\Route;
 					<span><?php echo Text::_('COM_VOLUNTEERTRACKER_EVENT_NAME'); ?></span>
 					<select class="form-select" name="jform[event_id]" required>
 						<option value=""><?php echo Text::_('COM_VOLUNTEERTRACKER_SELECT_EVENT'); ?></option>
+						<?php if (empty($this->item->id)) : ?>
+							<option value="all_active"><?php echo Text::_('COM_VOLUNTEERTRACKER_ALL_ACTIVE_EVENTS'); ?></option>
+						<?php endif; ?>
 						<?php foreach ($this->eventOptions as $event) : ?>
 							<?php $eventLabel = $event->event_name . ' - ' . HTMLHelper::_('date', $event->event_date, Text::_('DATE_FORMAT_LC4')); ?>
 							<option value="<?php echo (int) $event->id; ?>" <?php echo (int) $event->id === (int) $this->item->event_id ? 'selected' : ''; ?>>
