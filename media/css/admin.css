@@ -115,6 +115,15 @@
 	padding: 1rem 1.15rem;
 }
 
+.vt-dashboard-controls .vt-check,
+.vt-dashboard-controls .vt-check span {
+	color: #17232d;
+}
+
+.vt-dashboard-controls .vt-check span {
+	font-weight: 700;
+}
+
 .vt-role-card-grid {
 	display: grid;
 	gap: 1rem;

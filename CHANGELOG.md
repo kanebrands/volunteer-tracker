@@ -2,6 +2,11 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.20
+
+- Fixed dashboard archived-events selector label contrast so the text remains readable on the white panel background.
+- Moved the archived-events dashboard selector to the bottom of the dashboard page.
+
 ## 1.0.19
 
 - Added active/archived status for events.

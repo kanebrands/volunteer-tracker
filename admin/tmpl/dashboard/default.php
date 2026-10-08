@@ -113,13 +113,6 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 			</div>
 		</div>
 
-		<section class="vt-panel vt-dashboard-controls">
-			<label class="vt-check">
-				<input type="checkbox" id="vt-include-archived">
-				<span><?php echo Text::_('COM_VOLUNTEERTRACKER_INCLUDE_ARCHIVED_EVENTS'); ?></span>
-			</label>
-		</section>
-
 		<div class="vt-role-card-grid">
 			<section class="vt-panel vt-role-card">
 				<header>
@@ -388,6 +381,13 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 				</table>
 			</div>
 			<div class="vt-pagination" id="vt-event-pagination" aria-live="polite"></div>
+		</section>
+
+		<section class="vt-panel vt-dashboard-controls">
+			<label class="vt-check">
+				<input type="checkbox" id="vt-include-archived">
+				<span><?php echo Text::_('COM_VOLUNTEERTRACKER_INCLUDE_ARCHIVED_EVENTS'); ?></span>
+			</label>
 		</section>
 	</div>
 </div>
