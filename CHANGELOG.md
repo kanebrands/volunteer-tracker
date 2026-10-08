@@ -2,6 +2,11 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.21
+
+- Added duplicate-volunteer protection for active event assignments, with overwrite or skip handling for single-event and all-active-event entry.
+- Added an event-specific total volunteer summary row to the dashboard People by Role card.
+
 ## 1.0.20
 
 - Fixed dashboard archived-events selector label contrast so the text remains readable on the white panel background.
