@@ -534,7 +534,7 @@
 		const volunteerEventFilter = document.getElementById('vt-record-event-filter');
 		const eventStartDate = document.getElementById('vt-event-start-date');
 		const eventEndDate = document.getElementById('vt-event-end-date');
-		const includeArchived = document.getElementById('vt-include-archived');
+		const includeArchived = document.querySelector('[data-include-archived]')?.dataset.includeArchived === '1';
 		const formatDate = (date) => [
 			date.getFullYear(),
 			String(date.getMonth() + 1).padStart(2, '0'),
@@ -561,7 +561,7 @@
 			defaultSortType: 'date',
 			filters: [
 				(row) => !volunteerEventFilter || volunteerEventFilter.value === 'all' || row.dataset.eventId === volunteerEventFilter.value,
-				(row) => includeArchived?.checked || row.dataset.eventArchived !== '1',
+				(row) => includeArchived || row.dataset.eventArchived !== '1',
 			],
 		});
 
@@ -573,7 +573,7 @@
 			defaultSortType: 'date',
 			filters: [
 				(row) => {
-					if (!includeArchived?.checked && row.dataset.eventArchived === '1') {
+					if (!includeArchived && row.dataset.eventArchived === '1') {
 						return false;
 					}
 
@@ -593,10 +593,6 @@
 		});
 
 		volunteerEventFilter?.addEventListener('change', () => volunteerTableManager?.resetPage());
-		includeArchived?.addEventListener('change', () => {
-			volunteerTableManager?.resetPage();
-			eventTableManager?.resetPage();
-		});
 		eventStartDate?.addEventListener('change', () => eventTableManager?.resetPage());
 		eventEndDate?.addEventListener('change', () => eventTableManager?.resetPage());
 		volunteerTableManager?.render();

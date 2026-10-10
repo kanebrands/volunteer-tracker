@@ -6,12 +6,14 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use VolunteerTracker\Component\VolunteerTracker\Administrator\Helper\ConfigurationHelper;
 
 class DashboardModel extends BaseDatabaseModel
 {
 	public function getItems(): array
 	{
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 
 		$query = $db->getQuery(true)
 			->select([
@@ -30,6 +32,7 @@ class DashboardModel extends BaseDatabaseModel
 	public function getEvents(): array
 	{
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 
 		$query = $db->getQuery(true)
 			->select([
@@ -60,6 +63,7 @@ class DashboardModel extends BaseDatabaseModel
 	public function getStats(): object
 	{
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 
 		$stats = (object) [
 			'volunteers' => 0,
@@ -106,6 +110,11 @@ class DashboardModel extends BaseDatabaseModel
 	public function getVolunteerChart(): array
 	{
 		return $this->getGroupedHours('volunteer_name');
+	}
+
+	public function getConfiguration(): object
+	{
+		return ConfigurationHelper::getConfiguration($this->getDatabase());
 	}
 
 	private function getGroupedHours(string $column): array

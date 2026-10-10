@@ -6,6 +6,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use VolunteerTracker\Component\VolunteerTracker\Administrator\Helper\ConfigurationHelper;
 
 class VolunteerModel extends BaseDatabaseModel
 {
@@ -30,6 +31,7 @@ class VolunteerModel extends BaseDatabaseModel
 		}
 
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->quoteName('#__volunteertracker_entries'))
@@ -110,6 +112,7 @@ class VolunteerModel extends BaseDatabaseModel
 	public function getEventOptions(): array
 	{
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 
 		$query = $db->getQuery(true)
 			->select([
@@ -135,6 +138,7 @@ class VolunteerModel extends BaseDatabaseModel
 	public function getActiveAssignments(): array
 	{
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 
 		$query = $db->getQuery(true)
 			->select([
@@ -163,6 +167,50 @@ class VolunteerModel extends BaseDatabaseModel
 			->where($db->quoteName('id') . ' IN (' . implode(',', array_map('intval', $ids)) . ')');
 
 		$db->setQuery($query)->execute();
+	}
+
+	public function getItems(): array
+	{
+		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('entries') . '.*',
+				'COALESCE(' . $db->quoteName('events.is_archived') . ', 0) AS event_archived',
+			])
+			->from($db->quoteName('#__volunteertracker_entries', 'entries'))
+			->join('LEFT', $db->quoteName('#__volunteertracker_events', 'events') . ' ON ' . $db->quoteName('events.id') . ' = ' . $db->quoteName('entries.event_id'))
+			->order($db->quoteName('entries.event_date') . ' IS NULL ASC, ' . $db->quoteName('entries.event_date') . ' ASC, ' . $db->quoteName('entries.event_name') . ' ASC, ' . $db->quoteName('entries.volunteer_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
+	public function getEvents(): array
+	{
+		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('id'),
+				$db->quoteName('event_name'),
+				$db->quoteName('event_date'),
+				$db->quoteName('is_archived'),
+			])
+			->from($db->quoteName('#__volunteertracker_events'))
+			->order($db->quoteName('event_date') . ' IS NULL ASC, ' . $db->quoteName('event_date') . ' ASC, ' . $db->quoteName('event_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
+	public function getConfiguration(): object
+	{
+		return ConfigurationHelper::getConfiguration($this->getDatabase());
 	}
 
 	private function getDistinctOptions(string $column): array

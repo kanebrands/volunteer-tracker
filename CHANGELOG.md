@@ -2,6 +2,13 @@
 
 All notable changes to Volunteer Tracker are documented here.
 
+## 1.0.22
+
+- Added a Configuration submenu for persistent dashboard table archive visibility and automatic event archiving settings.
+- Added database-backed configuration defaults for dashboard archived-event display and a 30-day event archive delay.
+- Added automatic archiving for active events once the configured delay has elapsed after the event date.
+- Added Volunteer Records to the Volunteer Input screen and Event Records to the Event Input screen, including sorting, filters, pagination, CSV export, edit, and delete actions.
+
 ## 1.0.21
 
 - Added duplicate-volunteer protection for active event assignments, with overwrite or skip handling for single-event and all-active-event entry.

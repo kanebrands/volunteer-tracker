@@ -6,6 +6,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use VolunteerTracker\Component\VolunteerTracker\Administrator\Helper\ConfigurationHelper;
 
 class EventModel extends BaseDatabaseModel
 {
@@ -27,6 +28,7 @@ class EventModel extends BaseDatabaseModel
 		}
 
 		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->quoteName('#__volunteertracker_events'))
@@ -94,6 +96,42 @@ class EventModel extends BaseDatabaseModel
 			->where($db->quoteName('id') . ' IN (' . $idList . ')');
 
 		$db->setQuery($query)->execute();
+	}
+
+	public function getEvents(): array
+	{
+		$db = $this->getDatabase();
+		ConfigurationHelper::applyAutomaticArchiving($db);
+
+		$query = $db->getQuery(true)
+			->select([
+				$db->quoteName('events.id'),
+				$db->quoteName('events.event_name'),
+				$db->quoteName('events.event_date'),
+				$db->quoteName('events.event_location'),
+				$db->quoteName('events.is_archived'),
+				'COUNT(' . $db->quoteName('entries.id') . ') AS volunteer_entries',
+				'COALESCE(SUM(' . $db->quoteName('entries.hours') . '), 0) AS total_hours',
+			])
+			->from($db->quoteName('#__volunteertracker_events', 'events'))
+			->join('LEFT', $db->quoteName('#__volunteertracker_entries', 'entries') . ' ON ' . $db->quoteName('entries.event_id') . ' = ' . $db->quoteName('events.id'))
+			->group([
+				$db->quoteName('events.id'),
+				$db->quoteName('events.event_name'),
+				$db->quoteName('events.event_date'),
+				$db->quoteName('events.event_location'),
+				$db->quoteName('events.is_archived'),
+			])
+			->order($db->quoteName('events.event_date') . ' IS NULL ASC, ' . $db->quoteName('events.event_date') . ' ASC, ' . $db->quoteName('events.event_name') . ' ASC');
+
+		$db->setQuery($query);
+
+		return $db->loadObjectList() ?: [];
+	}
+
+	public function getConfiguration(): object
+	{
+		return ConfigurationHelper::getConfiguration($this->getDatabase());
 	}
 
 	private function isDuplicateEvent(object $row): bool

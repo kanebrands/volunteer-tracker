@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later</license>
 	<authorEmail></authorEmail>
 	<authorUrl>https://github.com/kanebrands</authorUrl>
-	<version>1.0.21</version>
+	<version>1.0.22</version>
 	<description>COM_VOLUNTEERTRACKER_XML_DESCRIPTION</description>
 	<namespace path="src">VolunteerTracker\Component\VolunteerTracker</namespace>
 
@@ -36,6 +36,7 @@
 			<menu link="option=com_volunteertracker&amp;view=event&amp;layout=edit" view="event" img="class:calendar">COM_VOLUNTEERTRACKER_EVENT_INPUT_MENU</menu>
 			<menu link="option=com_volunteertracker&amp;view=volunteer&amp;layout=edit" view="volunteer" img="class:new">COM_VOLUNTEERTRACKER_VOLUNTEER_INPUT_MENU</menu>
 			<menu link="option=com_volunteertracker&amp;view=reports" view="reports" img="class:list">COM_VOLUNTEERTRACKER_REPORTS_MENU</menu>
+			<menu link="option=com_volunteertracker&amp;view=configuration" view="configuration" img="class:options">COM_VOLUNTEERTRACKER_CONFIGURATION_MENU</menu>
 		</submenu>
 		<files folder="admin">
 			<filename>access.xml</filename>

@@ -16,6 +16,10 @@ class HtmlView extends BaseHtmlView
 	protected array $eventOptions = [];
 	protected array $roleOptions = [];
 	protected array $activeAssignments = [];
+	protected array $items = [];
+	protected array $events = [];
+	protected object $configuration;
+	protected string $extensionVersion = '1.0.22';
 
 	public function display($tpl = null): void
 	{
@@ -24,6 +28,9 @@ class HtmlView extends BaseHtmlView
 		$this->eventOptions     = $this->get('EventOptions');
 		$this->roleOptions      = $this->get('RoleOptions');
 		$this->activeAssignments = $this->get('ActiveAssignments');
+		$this->items            = $this->get('Items');
+		$this->events           = $this->get('Events');
+		$this->configuration    = $this->get('Configuration');
 		$this->addToolbar();
 		$this->loadAssets();
 
@@ -43,7 +50,10 @@ class HtmlView extends BaseHtmlView
 	private function loadAssets(): void
 	{
 		$base = Uri::root(true) . '/media/com_volunteertracker';
+		$version = rawurlencode($this->extensionVersion);
+		$document = $this->getDocument();
 
-		$this->getDocument()->addCustomTag('<link rel="stylesheet" href="' . $base . '/css/admin.css?v=1.0.21">');
+		$document->addCustomTag('<link rel="stylesheet" href="' . $base . '/css/admin.css?v=' . $version . '">');
+		$document->addCustomTag('<script src="' . $base . '/js/dashboard.js?v=' . $version . '" defer></script>');
 	}
 }

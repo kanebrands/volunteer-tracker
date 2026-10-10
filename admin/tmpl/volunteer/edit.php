@@ -68,6 +68,9 @@ $activeAssignments = array_map(static function ($assignment) {
 	<input type="hidden" name="task" value="volunteer.save">
 	<?php echo HTMLHelper::_('form.token'); ?>
 </form>
+<div class="vt-shell vt-record-shell" data-include-archived="<?php echo !empty($this->configuration->include_archived_dashboard) ? '1' : '0'; ?>">
+	<?php include JPATH_COMPONENT_ADMINISTRATOR . '/tmpl/common/volunteer_records.php'; ?>
+</div>
 <script>
 (() => {
 	const form = document.getElementById('adminForm');

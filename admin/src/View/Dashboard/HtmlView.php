@@ -17,7 +17,8 @@ class HtmlView extends BaseHtmlView
 	protected object $stats;
 	protected array $eventChart = [];
 	protected array $volunteerChart = [];
-	protected string $extensionVersion = '1.0.21';
+	protected object $configuration;
+	protected string $extensionVersion = '1.0.22';
 
 	public function display($tpl = null): void
 	{
@@ -26,6 +27,7 @@ class HtmlView extends BaseHtmlView
 		$this->stats          = $this->get('Stats');
 		$this->eventChart     = $this->get('EventChart');
 		$this->volunteerChart = $this->get('VolunteerChart');
+		$this->configuration  = $this->get('Configuration');
 
 		$this->addToolbar();
 		$this->loadAssets();

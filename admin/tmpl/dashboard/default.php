@@ -61,7 +61,7 @@ $eventChartJson = htmlspecialchars(json_encode($eventRows), ENT_QUOTES, 'UTF-8')
 $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 'UTF-8');
 ?>
 <div>
-	<div class="vt-shell">
+	<div class="vt-shell" data-include-archived="<?php echo !empty($this->configuration->include_archived_dashboard) ? '1' : '0'; ?>">
 		<section class="vt-app-panel">
 			<div class="vt-brand">
 				<div class="vt-logo" aria-hidden="true">
@@ -381,13 +381,6 @@ $volunteerChartJson = htmlspecialchars(json_encode($volunteerRows), ENT_QUOTES, 
 				</table>
 			</div>
 			<div class="vt-pagination" id="vt-event-pagination" aria-live="polite"></div>
-		</section>
-
-		<section class="vt-panel vt-dashboard-controls">
-			<label class="vt-check">
-				<input type="checkbox" id="vt-include-archived">
-				<span><?php echo Text::_('COM_VOLUNTEERTRACKER_INCLUDE_ARCHIVED_EVENTS'); ?></span>
-			</label>
 		</section>
 	</div>
 </div>

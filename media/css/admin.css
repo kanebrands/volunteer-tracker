@@ -7,6 +7,10 @@
 	padding: 1rem;
 }
 
+.vt-record-shell {
+	margin-top: 1rem;
+}
+
 .vt-app-panel,
 .vt-panel,
 .vt-stat {
@@ -591,6 +595,12 @@
 .vt-form-grid span {
 	color: #17232d;
 	font-weight: 700;
+}
+
+.vt-field-help {
+	color: #52636d;
+	font-size: .9rem;
+	margin: -.55rem 0 .15rem;
 }
 
 .vt-form-grid .form-control,

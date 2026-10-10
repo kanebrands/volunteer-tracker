@@ -35,3 +35,6 @@ use Joomla\CMS\Router\Route;
 	<input type="hidden" name="task" value="event.save">
 	<?php echo HTMLHelper::_('form.token'); ?>
 </form>
+<div class="vt-shell vt-record-shell" data-include-archived="<?php echo !empty($this->configuration->include_archived_dashboard) ? '1' : '0'; ?>">
+	<?php include JPATH_COMPONENT_ADMINISTRATOR . '/tmpl/common/event_records.php'; ?>
+</div>
